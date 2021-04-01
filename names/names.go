@@ -1,8 +1,8 @@
 package names
 
-// import (
-// 	"time"
-// )
+import (
+	"time"
+)
 
 type Names struct {
 	names map[string]string
@@ -15,8 +15,10 @@ type Registration struct {
 	address string // IP:port
 }
 
-func (*Names) Register(args *Registration, res *string) error {
-	//n := Names{}
+func (n *Names) Register(args *Registration, res *string) error {
+	// Not sure if any of the things I am doing here is correct
+	n.names[args.name] = args.address
+	n.heartbeat[args.name] = time.Now().UnixNano() // This is converting time to int64
 	return nil
 }
 
@@ -32,16 +34,23 @@ func (*Names) Heartbeat(args *string, res *string) error {
 	return nil
 }
 
-func (names *Names) checkHeartbeat() {
-	return
-	// for {
-		// time.Sleep(names.timeout / 2)
+func (n *Names) checkHeartbeat() {
+	for {
+		time.Sleep(time.Duration(n.timeout))
+		timeNow := time.Now().UnixNano()
 		// Remove all entries whose heartbeat is older than 60 seconds
-	// }
+		for host, heartbeat := range n.heartbeat {
+			if heartbeat - timeNow > 60 { // Im not sure if I am using the right unit here
+				res := "i dont know what this is for"
+				n.Unregister(&host, &res)
+			}
+		}
+	}
 }
 
 func Make() (res *Names) {
-	res = &Names{ }
+	res = &Names{}
+	res.timeout = 42 // Some base timeout
 	go res.checkHeartbeat()
 	return
 }
