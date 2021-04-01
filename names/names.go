@@ -2,6 +2,7 @@ package names
 
 import (
 	"time"
+	"errors"
 )
 
 type Names struct {
@@ -22,16 +23,25 @@ func (n *Names) Register(args *Registration, res *string) error {
 	return nil
 }
 
-func (*Names) Unregister(args *string, res *string) error {
+func (n *Names) Unregister(args *string, res *string) error {
+	// Remove host from heartbeat and from names
+	delete(n.heartbeat, *args)
+	delete(n.names, *args)
 	return nil
 }
 
-func (*Names) Resolve(args *string, res *string) error {
-	return nil
+func (n *Names) Resolve(args *string) (*string, error) {
+	if val, ok := n.names[*args]; ok {
+		return &val, nil
+	}
+	return nil, errors.New("not found")
 }
 
-func (*Names) Heartbeat(args *string, res *string) error {
-	return nil
+func (n *Names) Heartbeat(args *string) (*int64, error) {
+	if val, ok := n.heartbeat[*args]; ok {
+		return &val, nil
+	}
+	return nil, errors.New("not found")
 }
 
 func (n *Names) checkHeartbeat() {
@@ -49,8 +59,11 @@ func (n *Names) checkHeartbeat() {
 }
 
 func Make() (res *Names) {
-	res = &Names{}
-	res.timeout = 42 // Some base timeout
+	res = &Names{
+		names:     make(map[string]string),
+        heartbeat: make(map[string]int64),
+        timeout:   42, // Some base timeout 
+	}
 	go res.checkHeartbeat()
 	return
 }
