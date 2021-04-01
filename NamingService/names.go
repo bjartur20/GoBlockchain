@@ -6,8 +6,6 @@ type Names struct {
 	timeout int64
 }
 
-
-
 type Registration struct {
 	name string
 	address string // IP:port
