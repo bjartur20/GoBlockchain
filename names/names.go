@@ -40,7 +40,7 @@ func (names *Names) checkHeartbeat() {
 	// }
 }
 
-func  Make() (res *Names) {
+func Make() (res *Names) {
 	res = &Names{ }
 	go res.checkHeartbeat()
 	return
