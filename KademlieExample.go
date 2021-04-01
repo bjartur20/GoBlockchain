@@ -16,6 +16,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/bjartur20/T-419-CADP_OverlayNetworks/NamingService"
 	"net/http"
 	"os"
 	"time"
@@ -29,6 +30,7 @@ const (
 )
 
 func main() {
+	names.checkHeartbeat()
 	flag.Parse()
 	// To see logs, use the -logtostderr flag and change the verbosity with
 	// -v 0 (less verbose) up to -v 5 (more verbose).
