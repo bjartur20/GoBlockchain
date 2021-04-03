@@ -16,32 +16,36 @@ type Registration struct {
 	address string // IP:port
 }
 
-func (n *Names) Register(args *Registration, res *string) error {
+func (n *Names) Register(args *Registration) (res *string, err error) {
 	// Not sure if any of the things I am doing here is correct
 	n.names[args.name] = args.address
 	n.heartbeat[args.name] = time.Now().UnixNano() // This is converting time to int64
-	return nil
+	return
 }
 
-func (n *Names) Unregister(args *string, res *string) error {
+func (n *Names) Unregister(args *string) (res *string, err error) {
 	// Remove host from heartbeat and from names
 	delete(n.heartbeat, *args)
 	delete(n.names, *args)
-	return nil
+	return
 }
 
-func (n *Names) Resolve(args *string) (*string, error) {
+func (n *Names) Resolve(args *string) (res *string, err error) {
 	if val, ok := n.names[*args]; ok {
-		return &val, nil
+		res = &val
+		return
 	}
-	return nil, errors.New("not found")
+	err = errors.New("not found")
+	return
 }
 
-func (n *Names) Heartbeat(args *string) (*int64, error) {
+func (n *Names) Heartbeat(args *string) (res int64, err error) {
 	if val, ok := n.heartbeat[*args]; ok {
-		return &val, nil
+		res = val
+		return
 	}
-	return nil, errors.New("not found")
+	err = errors.New("not found")
+	return
 }
 
 func (n *Names) checkHeartbeat() {
@@ -51,8 +55,7 @@ func (n *Names) checkHeartbeat() {
 		// Remove all entries whose heartbeat is older than 60 seconds
 		for host, heartbeat := range n.heartbeat {
 			if heartbeat - timeNow > 60 { // Im not sure if I am using the right unit here
-				res := "i dont know what this is for"
-				n.Unregister(&host, &res)
+				n.Unregister(&host)
 			}
 		}
 	}
