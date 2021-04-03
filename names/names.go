@@ -2,7 +2,6 @@ package names
 
 import (
 	"errors"
-	"math"
 	"time"
 )
 
@@ -16,10 +15,13 @@ type Registration struct {
 	address string // IP:port
 }
 
+func (n *Names) GetConnected() (names *map[string]string) {
+	names = &n.names
+	return
+}
 func (n *Names) Register(args *Registration) (err error) {
-	// Not sure if any of the things I am doing here is correct
 	n.names[args.name] = args.address
-	n.heartbeats[args.name] = time.Now().UnixNano() // This is converting time to int64
+	n.heartbeats[args.name] = time.Now().UnixNano()
 	return
 }
 func (n *Names) Unregister(args *string) (err error) {
@@ -49,7 +51,7 @@ func (n *Names) checkHeartbeat() {
 		timeNow := time.Now().UnixNano()
 		// Remove all entries whose heartbeat is older than 60 seconds
 		for host, heartbeat := range n.heartbeats {
-			if timeNow-heartbeat > 60*int64(math.Pow10(9)) {
+			if timeNow-heartbeat > int64(60*time.Second) {
 				n.Unregister(&host)
 			}
 		}
@@ -59,7 +61,7 @@ func Make() (res *Names) {
 	res = &Names{
 		names:      make(map[string]string),
 		heartbeats: make(map[string]int64),
-		timeout:    int64(math.Pow10(9)), // 1 second base timeout
+		timeout:    int64(time.Second), // 1 second base timeout
 	}
 	go res.checkHeartbeat()
 	return

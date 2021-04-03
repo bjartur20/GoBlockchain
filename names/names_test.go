@@ -2,7 +2,7 @@ package names
 
 import (
 	"fmt"
-	"math"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -30,7 +30,7 @@ func TestRegister(t *testing.T) {
 	}
 	if hb, ok := names.heartbeats[node.name]; ok {
 		now := time.Now().UnixNano()
-		if hb < now-5*int64(math.Pow10(8)) || hb > now {
+		if hb < now-int64(100*time.Millisecond) || hb > now {
 			t.Error("Did not match time")
 		}
 	} else {
@@ -98,10 +98,26 @@ func TestCheckHeartbeat(t *testing.T) {
 	names := Make()
 	A := Registration{"Dead heartbeat", "123"}
 	names.Register(&A)
-	names.heartbeats[A.name] = time.Now().UnixNano() - 120*int64(math.Pow10(9))
+	names.heartbeats[A.name] = time.Now().UnixNano() - int64(120*time.Second)
 
 	time.Sleep(time.Second)
 	if len(names.names) != 0 || len(names.heartbeats) != 0 {
 		t.Error("node should have unregistered")
+	}
+}
+
+func TestGetConnected(t *testing.T) {
+	names := Make()
+	A := Registration{"A", "123"}
+	names.Register(&A)
+	B := Registration{"B", "123"}
+	names.Register(&B)
+	C := Registration{"C", "123"}
+	names.Register(&C)
+
+	want := map[string]string{A.name: A.address, B.name: B.address, C.name: C.address}
+	have := *names.GetConnected()
+	if !reflect.DeepEqual(want, have) {
+		t.Errorf("want %s, have %s", want, have)
 	}
 }
