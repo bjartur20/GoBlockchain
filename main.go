@@ -23,50 +23,39 @@ import (
 	"github.com/nictuku/dht"
 )
 
-// const (
-// 	httpPortTCP = 8711
-// 	numTarget   = 10
-// 	exampleIH   = "94a315e2cf8015b2f635d79aab592e6db557d5ea"
-// )
-
-func getHostname(addess *string, i int) (res *string) {
-	res = &[]string{"Emma", "Olivia", "Ava", "Isabella", "Sophia", "Charlotte", "Mia", "Amelia", "Harper", "Evelyn"}[i%10]
+func getHostname(address *string) (hostname *string, err error) {
+	url, err := url.Parse("http://" + *address)
+	if err != nil {
+		return
+	}
+	hostnames, err := net.LookupAddr(url.Hostname())
+	if err != nil {
+		return
+	}
+	hostname = &hostnames[0]
 	return
 }
 
-func processIncommingRequests(d *dht.DHT, n *names.Names) {
-	count := 0
-	for r := range d.PeersRequestResults { // Collect addresses requested by PeersRequest() Call
-		for _, peers := range r { // Returns our info hash and list of map of peers
-			for _, encodedAddress := range peers { // index Encoded Peer Address
-				address := dht.DecodePeerAddress(encodedAddress)
-				name := *getHostname(&address, count)
-				node := names.MakeRegistration(&name, &address)
-				n.Register(node)
-				fmt.Printf("%s: %s\n", name, address)
-				count++
-			}
-		}
-	}
-}
-
-func drainResults(n *dht.DHT, ih string) error {
+func drainResults(d *dht.DHT, n *names.Names, ih string) error {
 	count := 1
 	for {
 		select {
-		case r := <-n.PeersRequestResults:
+		case r := <-d.PeersRequestResults:
 			for _, peers := range r {
 				for _, x := range peers {
 					address := dht.DecodePeerAddress(x)
-					url, _ := url.Parse("http://" + address)
-					name, _ := net.LookupAddr(url.Hostname())
-					fmt.Printf("Hostname: %v (%v:%v)\n", name[0], url.Hostname(), url.Port())
-
+					hostname, err := getHostname(&address)
+					if err != nil {
+						continue
+					}
+					fmt.Printf("Peer connected: %v (%v)\n", *hostname, address)
+					node := names.MakeRegistration(hostname, &address)
+					n.Register(node)
 					count++
 				}
 			}
 		case <-time.Tick(time.Second / 5):
-			n.PeersRequest(ih, true)
+			d.PeersRequest(ih, true)
 		}
 	}
 }
@@ -101,7 +90,7 @@ func GetOutboundIP() net.IP {
 }
 
 func main() {
-	// nameService := names.Make()
+	nameService := names.Make()
 
 	infoHash, _ := dht.DecodeInfoHash("d1c5676ae7ac98e8b19f63565905105e3c4c37a2")
 
@@ -115,15 +104,7 @@ func main() {
 	startNode(router, string(infoHash))
 	startNode(router, string(infoHash))
 
-	// go drainResults(n1, string(infoHash))
-	// go drainResults(n2, string(infoHash))
-	// go drainResults(n3, string(infoHash))
-	// go drainResults(n4, string(infoHash))
-
-	go drainResults(routerNode, string(infoHash))
-	// go drainResults(n3, string(infoHash), 3, 1000*time.Second)
-
-	// go processIncommingRequests(d, nameService)
+	go drainResults(routerNode, nameService, string(infoHash))
 
 	for {
 		time.Sleep(100 * time.Second)
