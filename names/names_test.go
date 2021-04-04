@@ -14,6 +14,16 @@ func TestMake(t *testing.T) {
 		t.Errorf("have %s want *names.Names", namesType)
 	}
 }
+
+func TestRegistration(t *testing.T) {
+	name, address := "A", "123"
+	have := MakeRegistration(&name, &address)
+	want := Registration{name, address}
+	if *have != want {
+		t.Errorf("Want: %+v, have: %+v", want, have)
+	}
+}
+
 func TestRegister(t *testing.T) {
 	names := Make()
 	node := Registration{"A", "123"}

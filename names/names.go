@@ -57,6 +57,15 @@ func (n *Names) checkHeartbeat() {
 		}
 	}
 }
+
+func MakeRegistration(name, address *string) (res *Registration) {
+	res = &Registration{
+		name: *name,
+		address: *address,
+	}
+	return
+}
+
 func Make() (res *Names) {
 	res = &Names{
 		names:      make(map[string]string),
