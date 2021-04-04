@@ -60,7 +60,8 @@ func drainResults(n *dht.DHT, ih string) error {
 					address := dht.DecodePeerAddress(x)
 					url, _ := url.Parse("http://" + address)
 					name, _ := net.LookupAddr(url.Hostname())
-					fmt.Printf("Hostname: %v\n", name[0])
+					fmt.Printf("Hostname: %v (%v:%v)\n", name[0], url.Hostname(), url.Port())
+
 					count++
 				}
 			}
