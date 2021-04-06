@@ -18,6 +18,7 @@ import (
 	"net"
 	"net/url"
 	"time"
+	"flag"
 
 	"github.com/bjartur20/T-419-CADP_OverlayNetworks/names"
 	"github.com/nictuku/dht"
@@ -90,21 +91,29 @@ func GetOutboundIP() net.IP {
 }
 
 func main() {
-	nameService := names.Make()
-
 	infoHash, _ := dht.DecodeInfoHash("d1c5676ae7ac98e8b19f63565905105e3c4c37a2")
+	
+	flag.Parse()
+	if len(flag.Args()) == 0 {
+		fmt.Printf("No router argument, starting router node...\n")
 
-	routerNode, _ := startNode("", string(infoHash))
-	name := GetOutboundIP()
-	router := fmt.Sprintf("%s:%d", name, routerNode.Port())
-	fmt.Printf("Please connect to this router: %v. With info hash: %v\n", router, infoHash)
+		// Initialize the naming service
+		nameService := names.Make()
 
-	startNode(router, string(infoHash))
-	startNode(router, string(infoHash))
-	startNode(router, string(infoHash))
-	startNode(router, string(infoHash))
+		// Start route node
+		routerNode, _ := startNode("", string(infoHash))
+		name := GetOutboundIP()
+		router := fmt.Sprintf("%s:%d", name, routerNode.Port())
+		fmt.Printf("Please connect to this router: %v. With info hash: %v\n", router, infoHash)
+		go drainResults(routerNode, nameService, string(infoHash))
+	} else {
+		startNode(flag.Args()[0], string(infoHash))
+	}
 
-	go drainResults(routerNode, nameService, string(infoHash))
+	// startNode(router, string(infoHash))
+	// startNode(router, string(infoHash))
+	// startNode(router, string(infoHash))
+
 
 	for {
 		time.Sleep(100 * time.Second)
