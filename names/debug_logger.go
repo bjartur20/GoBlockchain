@@ -1,4 +1,4 @@
-package debug_logger
+package names
 
 type debugLogger struct{} 
 

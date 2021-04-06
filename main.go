@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/bjartur20/GoBlockchain/names"
-	"github.com/bjartur20/GoBlockchain/debug_logger"
 	"github.com/nictuku/dht"
 )
 
@@ -70,7 +69,7 @@ func startNode(routers string, ih string) (*dht.DHT, error) {
 	if err = node.Start(); err != nil {
 		return nil, err
 	}
-	node.DebugLogger = &debug_logger
+	node.DebugLogger = &names.debug_logger
 
 	return node, nil
 }
