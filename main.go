@@ -14,11 +14,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"net/url"
 	"time"
-	"flag"
 
 	"github.com/bjartur20/T-419-CADP_OverlayNetworks/names"
 	"github.com/nictuku/dht"
@@ -37,26 +37,21 @@ func getHostname(address *string) (hostname *string, err error) {
 	return
 }
 
-func drainResults(d *dht.DHT, n *names.Names, ih string) error {
-	count := 1
-	for {
-		select {
-		case r := <-d.PeersRequestResults:
-			for _, peers := range r {
-				for _, x := range peers {
-					address := dht.DecodePeerAddress(x)
-					hostname, err := getHostname(&address)
-					if err != nil {
-						continue
-					}
-					fmt.Printf("Peer connected: %v (%v)\n", *hostname, address)
+func drainResults(d *dht.DHT, n *names.Names) {
+	for r := range d.PeersRequestResults {
+		for _, peers := range r {
+			for _, x := range peers {
+				address := dht.DecodePeerAddress(x)
+				hostname, err := getHostname(&address)
+				if err != nil {
+					continue
+				}
+				fmt.Printf("Peer connected: %v (%v)\n", *hostname, address)
+				if n != nil {
 					node := names.MakeRegistration(hostname, &address)
 					n.Register(node)
-					count++
 				}
 			}
-		case <-time.Tick(time.Second / 5):
-			d.PeersRequest(ih, true)
 		}
 	}
 }
@@ -79,7 +74,7 @@ func startNode(routers string, ih string) (*dht.DHT, error) {
 
 // Get preferred outbound ip of this machine
 func GetOutboundIP() net.IP {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+	conn, err := net.Dial("udp", "1.1.1.1:80")
 	if err != nil {
 		fmt.Errorf("%v", err)
 	}
@@ -91,31 +86,34 @@ func GetOutboundIP() net.IP {
 }
 
 func main() {
-	infoHash, _ := dht.DecodeInfoHash("d1c5676ae7ac98e8b19f63565905105e3c4c37a2")
-	
 	flag.Parse()
+	infoHash, _ := dht.DecodeInfoHash("d1c5676ae7ac98e8b19f63565905105e3c4c37a2")
+	var nameService *names.Names
+	var node *dht.DHT
+
 	if len(flag.Args()) == 0 {
 		fmt.Printf("No router argument, starting router node...\n")
 
 		// Initialize the naming service
-		nameService := names.Make()
+		nameService = names.Make()
 
 		// Start route node
-		routerNode, _ := startNode("", string(infoHash))
+		node, _ = startNode("", string(infoHash))
 		name := GetOutboundIP()
-		router := fmt.Sprintf("%s:%d", name, routerNode.Port())
-		fmt.Printf("Please connect to this router: %v. With info hash: %v\n", router, infoHash)
-		go drainResults(routerNode, nameService, string(infoHash))
+		ip := fmt.Sprintf("%s:%d", name, node.Port())
+		fmt.Printf("Please connect to this router: %v. With info hash: %v\n", ip, infoHash)
 	} else {
-		startNode(flag.Args()[0], string(infoHash))
+		nameService = nil
+		node, _ = startNode(flag.Args()[0], string(infoHash))
+		name := GetOutboundIP()
+		ip := fmt.Sprintf("%s:%d", name, node.Port())
+		fmt.Printf("Started node: %v. With info hash: %v\n", ip, infoHash)
 	}
 
-	// startNode(router, string(infoHash))
-	// startNode(router, string(infoHash))
-	// startNode(router, string(infoHash))
-
+	go drainResults(node, nameService)
 
 	for {
-		time.Sleep(100 * time.Second)
+		node.PeersRequest(string(infoHash), true)
+		time.Sleep(5 * time.Second)
 	}
 }
