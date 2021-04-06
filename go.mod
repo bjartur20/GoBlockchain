@@ -1,4 +1,4 @@
-module github.com/bjartur20/T-419-CADP_OverlayNetworks
+module github.com/bjartur20/GoBlockchain
 
 go 1.15
 

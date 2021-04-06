@@ -21,8 +21,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bjartur20/T-419-CADP_OverlayNetworks/names"
-	"github.com/bjartur20/T-419-CADP_OverlayNetworks/debug_logger"
+	"github.com/bjartur20/GoBlockchain/names"
+	"github.com/bjartur20/GoBlockchain/debug_logger"
 	"github.com/nictuku/dht"
 )
 
