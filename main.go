@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"net/http"
 	"time"
 
 	"github.com/bjartur20/T-419-CADP_OverlayNetworks/names"
+	"github.com/bjartur20/T-419-CADP_OverlayNetworks/debug_logger"
 	"github.com/nictuku/dht"
 )
 
@@ -68,7 +70,8 @@ func startNode(routers string, ih string) (*dht.DHT, error) {
 	if err = node.Start(); err != nil {
 		return nil, err
 	}
-	node.PeersRequest(ih, true)
+	node.DebugLogger = &debug_logger
+
 	return node, nil
 }
 
@@ -101,14 +104,18 @@ func main() {
 		node, _ = startNode("", string(infoHash))
 		name := GetOutboundIP()
 		ip := fmt.Sprintf("%s:%d", name, node.Port())
+		go http.ListenAndServe(":8711", nil)
 		fmt.Printf("Please connect to this router: %v. With info hash: %v\n", ip, infoHash)
 	} else {
 		nameService = nil
 		node, _ = startNode(flag.Args()[0], string(infoHash))
 		name := GetOutboundIP()
 		ip := fmt.Sprintf("%s:%d", name, node.Port())
+		go http.ListenAndServe(":8712", nil)
 		fmt.Printf("Started node: %v. With info hash: %v\n", ip, infoHash)
 	}
+
+	// go http.ListenAndServe(fmt.Sprintf(":%d", httpPortTCP), nil)
 
 	go drainResults(node, nameService)
 
