@@ -1,4 +1,4 @@
-module github.com/nictuku/dht
+module github.com/bjartur20/GoBlockchain/dht
 
 go 1.12
 
