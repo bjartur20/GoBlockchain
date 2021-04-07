@@ -20,7 +20,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/nictuku/dht"
+	"github.com/bjartur20/GoBlockchain/dht"
 )
 
 const (
