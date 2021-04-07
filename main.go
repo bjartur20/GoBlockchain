@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/bjartur20/GoBlockchain/names"
-	"github.com/nictuku/dht"
+	"github.com/bjartur20/GoBlockchain/dht"
 )
 
 type debugLogger struct{} 
