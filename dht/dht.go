@@ -571,11 +571,12 @@ func (d *DHT) helloFromPeer(addr string) {
 
 func (d *DHT) processPacket(p packetType) {
 	d.DebugLogger.Debugf("DHT processing packet from %v", p.raddr.String())
-	if !d.clientThrottle.CheckBlock(p.raddr.IP.String()) {
-		totalPacketsFromBlockedHosts.Add(1)
-		d.DebugLogger.Debugf("Node exceeded rate limiter. Dropping packet.")
-		return
-	}
+	// Causes errors...
+	// if !d.clientThrottle.CheckBlock(p.raddr.IP.String()) {
+	// 	totalPacketsFromBlockedHosts.Add(1)
+	// 	d.DebugLogger.Debugf("Node exceeded rate limiter. Dropping packet.")
+	// 	return
+	// }
 	if p.b[0] != 'd' {
 		// Malformed DHT packet. There are protocol extensions out
 		// there that we don't support or understand.
