@@ -1,5 +1,9 @@
 package names
 
+import (
+	"fmt"
+)
+
 type debugLogger struct{} 
 
 func (*debugLogger) Debugf(f string, args... interface{}) { 

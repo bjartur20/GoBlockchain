@@ -25,6 +25,23 @@ import (
 	"github.com/nictuku/dht"
 )
 
+type debugLogger struct{} 
+
+func (*debugLogger) Debugf(f string, args... interface{}) { 
+	fmt.Printf(f, args...)
+	fmt.Println()
+}
+
+func (*debugLogger) Infof(f string, args... interface{}) { 
+	fmt.Printf(f, args...) 
+	fmt.Println() 
+}
+
+func (*debugLogger) Errorf(f string, args... interface{}) { 
+	fmt.Printf(f, args...)
+	fmt.Println()
+}
+
 func getHostname(address *string) (hostname *string, err error) {
 	url, err := url.Parse("http://" + *address)
 	if err != nil {
@@ -69,7 +86,6 @@ func startNode(routers string, ih string) (*dht.DHT, error) {
 	if err = node.Start(); err != nil {
 		return nil, err
 	}
-	node.DebugLogger = &names.debug_logger
 
 	return node, nil
 }
@@ -101,6 +117,7 @@ func main() {
 
 		// Start route node
 		node, _ = startNode("", string(infoHash))
+		node.DebugLogger = &debugLogger{}
 		name := GetOutboundIP()
 		ip := fmt.Sprintf("%s:%d", name, node.Port())
 		go http.ListenAndServe(":8711", nil)
