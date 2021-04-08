@@ -8,10 +8,10 @@ We implement a router node that has an REST API: http://localhost:7344.
 POST /v1/discovery
 ```
 
-<!-- **Ping (heartbeat)**
+**Ping (heartbeat)**
 ```
 GET /v1/discovery
-``` -->
+```
 
 **Unregister**
 ```
