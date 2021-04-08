@@ -1,11 +1,13 @@
 package discovery
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"time"
 
 	"github.com/nictuku/dht"
+	"github.com/bjartur20/GoBlockchain/internal/daemon/debug_logger"
 )
 
 const (
@@ -42,6 +44,19 @@ func createDHTConfig(routers string) (c *dht.Config) {
 	return
 }
 
+// Get preferred outbound ip of this machine
+func GetOutboundIP() net.IP {
+    conn, err := net.Dial("udp", "1.1.1.1:80")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer conn.Close()
+
+    localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+    return localAddr.IP
+}
+
 func Run(routers string) {
 	ih, err := dht.DecodeInfoHash(GenesisBlockHash)
 
@@ -57,6 +72,16 @@ func Run(routers string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Start debug logger
+	d.DebugLogger = &debug_logger.DebugLogger{}
+
+	// Print node's name+ip
+	name := GetOutboundIP()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Printf("%s:%d\n", name, d.Port())
 
 	// Drain discovered nodes in a seperate goroutine.
 	go drainNodes(d)
