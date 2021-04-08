@@ -3,11 +3,11 @@
 ---
 We implement a router node that has an REST API: http://localhost:7344.
 
-|Action|URL|
-|-|-|
-| **Register** | `POST /v1/discovery` 
-**Ping (heartbeat)** | `GET /v1/discovery` 
-**Unregister** | `DELETE /v1/discovery`
+|       Action       |          URL          |
+|--------------------|-----------------------|
+|**Register**        | `POST` /v1/discovery  | 
+|**Ping (heartbeat)**| `GET` /v1/discovery   |
+|**Unregister**      | `DELETE` /v1/discovery|
 
 ### How it works
 The daemon starts by intializing the network's configuration from the flags. Then, it initializes the naming service, starts the DHT node and the router.
@@ -27,8 +27,6 @@ After creating the node, we start it and a goroutine to drain the nodes that our
 
 ## Authors
 ---
-Bjartur Þórhallsson
-
-Laurynas Cetyrkinas
-
-Ýmir Þórleifsson
+- Bjartur Þórhallsson
+- Laurynas Cetyrkinas
+- Ýmir Þórleifsson
