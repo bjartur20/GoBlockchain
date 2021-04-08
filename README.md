@@ -3,10 +3,11 @@
 ---
 We implement a router node that has an REST API: http://localhost:7344.
 
-
->**Register:**&emsp;&emsp;&emsp;&emsp;&emsp;`POST /v1/discovery` \
-**Ping (heartbeat):**&emsp; `GET /v1/discovery` \
-**Unregister:**&emsp;&emsp;&emsp;&emsp;`DELETE /v1/discovery`
+|Action|URL|
+|-|-|
+| **Register** | `POST /v1/discovery` 
+**Ping (heartbeat)** | `GET /v1/discovery` 
+**Unregister** | `DELETE /v1/discovery`
 
 ### How it works
 The daemon starts by intializing the network's configuration from the flags. Then, it initializes the naming service, starts the DHT node and the router.
