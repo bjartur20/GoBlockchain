@@ -15,24 +15,20 @@ const (
 )
 
 func drainNodes(n *dht.DHT) {
-	// count := 0
-	// fmt.Println("Peers found:")
 	for r := range n.PeersRequestResults {
 		for _, peers := range r {
 			for _, x := range peers {
-				// fmt.Printf("%d: %v\n", count, dht.DecodePeerAddress(x))
-				// count++
-				ip, _, err := net.SplitHostPort(dht.DecodePeerAddress(x))
-				if err != nil {
-					log.Println(err)
-					continue
-				}
+				addr := dht.DecodePeerAddress(x)
+				ip, _, _ := net.SplitHostPort(addr)
+				// if err != nil {
+				// 	log.Println(err)
+				// 	continue
+				// }
 				ptr, err := net.LookupAddr(ip)
 				if err != nil {
 					log.Println(err)
 					continue
 				}
-
 				log.Println("peer:", ptr[0])
 			}
 		}
@@ -52,10 +48,10 @@ func Run(routers string) {
 	ih, err := dht.DecodeInfoHash(GenesisBlockHash)
 
 	// Create config
-	c := createDHTConfig(routers)
+	// c := createDHTConfig(routers)
 
 	// Start a DHT node on random port.
-	d, err := dht.New(c)
+	d, err := dht.New(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
