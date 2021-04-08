@@ -29,7 +29,12 @@ func drainNodes(n *dht.DHT) {
 					log.Println(err)
 					continue
 				}
+<<<<<<< HEAD
 				log.Println("peer:", ptr[0])
+=======
+
+				log.Printf("Peer: %s (%s)\n", ptr[0], dht.DecodePeerAddress(x))
+>>>>>>> 7916bac479a81425de058a709e3fe7a556152c5f
 			}
 		}
 	}
